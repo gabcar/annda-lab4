@@ -191,16 +191,22 @@ def assignment4_1_2():
 
 def assignment4_2_DBN():
     data = loadAll()
-    n_iter = 20
-    no_of_layers = 3
-    nodes = [200,150,100,50]
-    rbms = []
+    n_iter = 2
+    n_iter_mlp = 5
+
+    nodes = [200,150]#,100,50]
+    no_of_layers = len(nodes)
+
     learning_rate = 0.01
 
     batch_size = 200
 
-    pipe = []
     train = data['X']
+    test_img = data['plot_ims']
+    rbms = []
+    pipe = []
+    acc = []
+
     for i in range(no_of_layers):
         rbm = BernoulliRBM(n_components=nodes[i], verbose=True, batch_size=batch_size, random_state=1)
 
@@ -216,15 +222,16 @@ def assignment4_2_DBN():
 
         train = rbm.fit_transform(train)  # Enable to start pre-training
 
-        print(rbm.get_params())
-        print(rbm.get_params(deep=True))
-
         rbms.append(rbm)
         pipe.append(('rbm{}'.format(i), rbm))
 
-    mlp = MLPClassifier(solver='sgd', random_state=1, learning_rate="adaptive", learning_rate_init=0.01, hidden_layer_sizes=(nodes[no_of_layers-1],10))
+        print("pre-training step {}/{} done.".format(i+1,no_of_layers))
 
+    mlp = MLPClassifier(solver='sgd', random_state=1, learning_rate="adaptive", learning_rate_init=0.01, hidden_layer_sizes=(nodes[no_of_layers-1],10), max_iter=n_iter_mlp, verbose=True)
+
+    print(pipe)
     pipe.append(('mlp', mlp))
+    print(pipe)
 
     clsf = Pipeline(pipe)
 
@@ -232,26 +239,11 @@ def assignment4_2_DBN():
 
     predicted_classes = clsf.predict(data['X_tst'])
 
-    test_img = data['plot_ims']
-    dbn_img = []
-    for i in range(10):
-        dbn_img.append(clsf.predict([np.array([test_img[i]])]))
+    acc.append(np.sum(data['T_tst'].T == predicted_classes)/len(data['T_tst']) * 100)
 
-    fig, ax = plt.subplots(2,5)
-    fig.suptitle("RBM reconstruction error: {} epochs, nodes: {}".format(n_iter, nodes))
-    for i in range(10):
-        plt.subplot(2,5,i+1)
-        plt.xticks([], [])
-        plt.yticks([], [])
-        plt.imshow(dbn_img[i].reshape(28,28), cmap='binary')
-        plt.xlabel(str(i))
-    plt.show()
-
-    print(predicted_classes)
-    print(data['T_tst'])
-
-    acc = np.sum(data['T_tst'].T == predicted_classes)/len(data['T_tst']) * 100
     print(acc)
+
+
 
 def assignment4_2_AE():
     data = loadAll()
@@ -263,6 +255,6 @@ def assignment4_2_AE():
 
 if __name__ == '__main__':
     #assignment4_1()
-    assignment4_1_2()
-    #assignment4_2_DBN()
+    #assignment4_1_2()
+    assignment4_2_DBN()
     #assignment4_2_AE()
