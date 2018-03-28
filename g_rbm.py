@@ -40,7 +40,7 @@ def loadAll():
 
 def trainRBM(data, n_components, n_iter, batch_size, learning_rate=0.01):
     acc = []
-    err = []
+    err = np.zeros((n_iter,2))
 
     rbm = BernoulliRBM(verbose=True, batch_size=batch_size, random_state=1, n_components=n_components)
 
@@ -56,12 +56,10 @@ def trainRBM(data, n_components, n_iter, batch_size, learning_rate=0.01):
     rbm.n_iter = 1
     for i in range(n_iter):
         rbm.fit(data['X'])
-
-        for image in data['X_tst']:
-            test = rbm.gibbs(image)
-            acc.append(np.sum(np.abs(test-image)))
-        err.append(np.mean(acc)/n_features)
-        acc = []
+        test = rbm.gibbs(data['X'])
+        train = rbm.gibbs(data['X'])
+        err[i,1] = np.sum((test-data['X'])**2)/(n_features*len(data['X']))
+        err[i,0] = np.sum((train-data['X'])**2)/(n_features*len(data['X']))
 
     return rbm, err
 
@@ -69,29 +67,22 @@ def trainAE(data, n_components, n_iter=200, batch_size=200, learning_rate=0.01):
     image_dim = data['X'].shape[1]
     input_img = Input(shape=(image_dim,))
     err = []
-    acc = []
 
     encoder_layer = Dense(n_components, activation="relu")(input_img)
-    decoder_layer = Dense(image_dim, activation="hard_sigmoid")(encoder_layer)
+    decoder_layer = Dense(image_dim, activation="sigmoid")(encoder_layer)
     # this model maps an input to its reconstruction
     ae = Model(input_img, decoder_layer)
 
-    ae.compile(optimizer='sgd', loss='binary_crossentropy')
+    ae.compile(optimizer='adadelta', loss='mean_squared_error')
 
-    for i in range(n_iter):
-        ae.fit(np.array(data['X']), np.array(data['X']),
-                verbose=0,
-                epochs=1,
-                batch_size=batch_size,
-                shuffle=True,
-                validation_data=(data['X_tst'], data['X_tst']))
-        print("AE Epoch: {}".format(i))
-        for image in data['X_tst']:
-            test = ae.predict([np.array([image])]) > 0.5
-            acc.append(np.sum(np.abs(test-image)))
-        err.append(np.mean(acc)/image_dim)
-        acc = []
+    h = ae.fit(np.array(data['X']), np.array(data['X']),
+            verbose=1,
+            epochs=n_iter,
+            batch_size=64,
+            shuffle=True,
+            validation_data=(data['X_tst'], data['X_tst']))
 
+    err = h.history
     return ae, err
 
 def assignment4_1():
@@ -101,7 +92,7 @@ def assignment4_1():
 
     for n in N:
         n_components = n
-        n_iter_ae = 200
+        n_iter_ae = 150
         n_iter_rbm = 20
         batch_size = 200
 
@@ -116,34 +107,28 @@ def assignment4_1():
             print("loaded exiting model\n")
         else:
             ae, err_ae = trainAE(data, n_components, n_iter=n_iter_ae, batch_size=batch_size, learning_rate=0.01)
-            df = pd.DataFrame(err_ae)
-            df.to_csv("data/ae_hidden_{}.csv".format(n))
+
             model_json = ae.to_json()
             with open("model.json", "w") as json_file:
                 json_file.write(model_json)
             # serialize weights to HDF5
-            ae.save_weights("ae_model{}.h5".format(n_components))
+            #ae.save_weights("ae_model{}.h5".format(n_components))
 
 
         rbm, err_rbm = trainRBM(data, n_components, n_iter=n_iter_rbm, batch_size=batch_size, learning_rate=0.01)
         df = pd.DataFrame(err_rbm)
-        df.to_csv("data/rbm_hidden_{}.csv".format(n))
+        df.to_csv("data/rbm_hidden_{}e_{}.csv".format(n_iter_rbm,n), header=["tr_loss","val_loss"])
 
         gibbs = rbm.gibbs(test_img)
 
-        ae_img = ae.predict([np.array(test_img)])
+        ae_img = []
+        err_ae = np.vstack((err_ae['loss'], err_ae['val_loss'])).T
+        df = pd.DataFrame(err_ae)
+        df.to_csv("data/ae_hidden_adadelta_{}e_{}.csv".format(n_iter_ae, n), header=["tr_loss","val_loss"])
 
-        fig, ax = plt.subplots(1,3)
-        plt.subplot(1,3,1)
-        plt.imshow(test_img[0].reshape(28,28), cmap='binary')
-
-        plt.subplot(1,3,2)
-        plt.imshow(gibbs[0].reshape(28,28), cmap='binary')
-
-        plt.subplot(1,3,3)
-        plt.imshow((ae_img[0] > 0.5).reshape(28,28), cmap='binary')
-
-        fig.savefig('plots/3_1/rbm_ae_{}_nodes.png'.format(n))
+        print(test_img[1].shape)
+        for i in range(10):
+            ae_img.append(ae.predict([np.array([test_img[i]])]))
 
         fig, ax = plt.subplots(2,5)
         fig.suptitle("RBM reconstruction error: {} epochs, {} nodes".format(n_iter_rbm, n))
@@ -154,7 +139,7 @@ def assignment4_1():
             plt.imshow(gibbs[i].reshape(28,28), cmap='binary')
             plt.xlabel(str(i))
 
-        fig.savefig('plots/3_1/rbm_{}_nodes.png'.format(n))
+        fig.savefig('plots/3_1/rbm_{}e_{}_nodes.png'.format(n_iter_rbm,n))
 
         fig, ax = plt.subplots(2,5)
         fig.suptitle("AE reconstruction error: {} epochs, {} nodes".format(n_iter_ae, n))
@@ -162,9 +147,9 @@ def assignment4_1():
             plt.subplot(2,5,i+1)
             plt.xticks([], [])
             plt.yticks([], [])
-            plt.imshow(ae_img[i].reshape(28,28) >= 0.5, cmap='binary')
+            plt.imshow(ae_img[i].reshape(28,28), cmap='binary')
             plt.xlabel(str(i))
-        fig.savefig('plots/3_1/ae_{}_nodes.png'.format(n))
+        fig.savefig('plots/3_1/ae_adadelta_{}e_{}_nodes.png'.format(n_iter_ae, n))
 
         #fig, ax = plt.subplots(2,1, figsize=(10,5))
         fig = plt.figure()
@@ -173,7 +158,7 @@ def assignment4_1():
         plt.ylabel("Accuracy [%]")
         plt.title("AE")
 
-        fig.savefig('plots/3_1/error_plots_ae_{}_nodes.png'.format(n))
+        fig.savefig('plots/3_1/error_adadelta_plots_{}e_ae_{}_nodes.png'.format(n_iter_ae,n))
 
         fig = plt.figure()
         plt.plot(err_rbm)
@@ -181,7 +166,7 @@ def assignment4_1():
         plt.ylabel("Accuracy [%]")
         plt.title("RBM")
 
-        fig.savefig('plots/3_1/error_plots_rbm_{}_nodes.png'.format(n))
+        fig.savefig('plots/3_1/error_plots_rbm{}_{}_nodes.png'.format(n_iter_rbm, n))
 
         print("{} nodes complete.".format(n))
 
@@ -189,42 +174,26 @@ def assignment4_1_2():
     data = loadAll()
     n_components = 100
     n_iter_ae = 100
-    n_iter_rbm = 20
     batch_size = 200
 
-    if (os.path.isfile("ae_model_{}.h5".format(n_components))):
-        json_file = open('model.json', 'r')
-        loaded_model_json = json_file.read()
-        json_file.close()
-        ae = model_from_json(loaded_model_json)
-        # load weights into new model
-        ae.load_weights("ae_model_{}.h5".format(n_components))
-        ae.compile(optimizer='sgd', loss='binary_crossentropy')
-        print("loaded exiting model\n")
-    else:
-        ae, err_ae = trainAE(data, n_components, n_iter=n_iter_ae, batch_size=batch_size, learning_rate=0.01)
-        model_json = ae.to_json()
-        with open("model.json", "w") as json_file:
-            json_file.write(model_json)
-        # serialize weights to HDF5
-        ae.save_weights("ae_model{}.h5".format(n_components))
+    ae, err_ae = trainAE(data, n_components, n_iter=n_iter_ae, batch_size=batch_size, learning_rate=0.01)
 
     last_layer = ae.layers[2]
 
-    plt.subplots(2,5)
-    for i in range(10):
-        plt.subplot(2,5,i+1)
+    fig, ax = plt.subplots(10,10,figsize=(15,15))
+    for i in range(10*10):
+        plt.subplot(10,10,i+1)
         plt.imshow(last_layer.get_weights()[0][i].reshape(28,28), cmap='binary')
 
-    plt.show()
-    #rbm, err_rbm = trainRBM(data, n_components, n_iter=n_iter_rbm, batch_size=batch_size, learning_rate=0.01)
+    fig.savefig("plots/3_1_2/last_layer_{}_components_{}e.png".format(n_components,n_iter_ae))
 
 
-def assignment4_2():
+
+def assignment4_2_DBN():
     data = loadAll()
     n_iter = 20
     no_of_layers = 3
-    nodes = [200,100,50]
+    nodes = [200,150,100,50]
     rbms = []
     learning_rate = 0.01
 
@@ -263,13 +232,37 @@ def assignment4_2():
 
     predicted_classes = clsf.predict(data['X_tst'])
 
+    test_img = data['plot_ims']
+    dbn_img = []
+    for i in range(10):
+        dbn_img.append(clsf.predict([np.array([test_img[i]])]))
+
+    fig, ax = plt.subplots(2,5)
+    fig.suptitle("RBM reconstruction error: {} epochs, nodes: {}".format(n_iter, nodes))
+    for i in range(10):
+        plt.subplot(2,5,i+1)
+        plt.xticks([], [])
+        plt.yticks([], [])
+        plt.imshow(dbn_img[i].reshape(28,28), cmap='binary')
+        plt.xlabel(str(i))
+    plt.show()
+
     print(predicted_classes)
     print(data['T_tst'])
 
     acc = np.sum(data['T_tst'].T == predicted_classes)/len(data['T_tst']) * 100
     print(acc)
 
+def assignment4_2_AE():
+    data = loadAll()
+    n_iter = 20
+    no_of_layers = 3
+    nodes = [200,100,50]
+    rbms = []
+    learning_rate = 0.01
+
 if __name__ == '__main__':
-    assignment4_1()
-    #assignment4_1_2()
-    #assignment4_2()
+    #assignment4_1()
+    assignment4_1_2()
+    #assignment4_2_DBN()
+    #assignment4_2_AE()
