@@ -4,9 +4,10 @@ import os.path
 import pickle
 from sklearn.neural_network import MLPClassifier
 from sklearn.pipeline import Pipeline
+from sklearn.externals import joblib
 from keras.layers import Input, Dense
 from keras.models import Model
-from keras.models import model_from_json
+from keras.models import model_from_json, load_model
 from rbm import BernoulliRBM
 import pandas as pd
 
@@ -93,18 +94,19 @@ def assignment4_1():
     for n in N:
         n_components = n
         n_iter_ae = 150
-        n_iter_rbm = 20
+        n_iter_rbm = 75
         batch_size = 200
 
         if (os.path.isfile("ae_model_{}.h5".format(n_components))):
-            json_file = open('model.json', 'r')
-            loaded_model_json = json_file.read()
-            json_file.close()
-            ae = model_from_json(loaded_model_json)
+            #json_file = open('model.json', 'r')
+            #loaded_model_json = json_file.read()
+            #json_file.close()
+            #ae = model_from_json(loaded_model_json)
             # load weights into new model
-            ae.load_weights("ae_model_4_1_{}.h5".format(n_components))
-            ae.compile(optimizer='sgd', loss='binary_crossentropy')
-            print("loaded exiting model\n")
+            #ae.load_weights("ae_model_4_1_{}.h5".format(n_components))
+            #ae.compile(optimizer='sgd', loss='binary_crossentropy')
+            #print("loaded exiting model\n")
+            ae = load_model('ae_model_{}.h5'.format(n_components))
         else:
             ae, err_ae = trainAE(data, n_components, n_iter=n_iter_ae, batch_size=batch_size, learning_rate=0.01)
 
@@ -112,12 +114,17 @@ def assignment4_1():
             with open("model.json", "w") as json_file:
                 json_file.write(model_json)
             # serialize weights to HDF5
-            #ae.save_weights("ae_model{}.h5".format(n_components))
+            ae.save("ae_model{}.h5".format(n_components))
 
 
-        rbm, err_rbm = trainRBM(data, n_components, n_iter=n_iter_rbm, batch_size=batch_size, learning_rate=0.01)
-        df = pd.DataFrame(err_rbm)
-        df.to_csv("data/rbm_hidden_{}e_{}.csv".format(n_iter_rbm,n), header=["tr_loss","val_loss"])
+        if (os.path.isfile('rbm_model_{}.pkl'.format(n_components))):
+            rbm = joblib.load('rbm_model_{}.pkl'.format(n_components))
+        else:
+            
+            rbm, err_rbm = trainRBM(data, n_components, n_iter=n_iter_rbm, batch_size=batch_size, learning_rate=0.01)
+            df = pd.DataFrame(err_rbm)
+            df.to_csv("data/rbm_hidden_{}e_{}.csv".format(n_iter_rbm,n), header=["tr_loss","val_loss"])
+            joblib.dump(rbm, 'rbm_model_{}.pkl'.format(n_components))
 
         gibbs = rbm.gibbs(test_img)
 
@@ -169,6 +176,40 @@ def assignment4_1():
         fig.savefig('plots/3_1/error_plots_rbm{}_{}_nodes.png'.format(n_iter_rbm, n))
 
         print("{} nodes complete.".format(n))
+
+def assignment4_1_1():
+    
+    test_images = loadAll()['plot_ims']
+    N = [50, 75, 100, 150]
+    
+    for n_components in N:
+        ae = load_model('ae_model{}.h5'.format(n_components))
+        rbm = joblib.load('rbm_model_{}.pkl'.format(n_components))
+        fig_ae, ax_ae = plt.subplots(1, 10, figsize=(20, 2))
+        fig_rbm, ax_rbm = plt.subplots(1, 10, figsize=(20, 2))
+        
+        for i in range(10):
+            recall_ae = ae.predict([np.array([test_images[i]])])  # what is this black magic
+            recall_rbm = rbm.gibbs(test_images[i])
+            ax_ae[i].imshow(recall_ae.reshape(28, 28), cmap='binary')
+            ax_rbm[i].imshow(recall_rbm.reshape(28, 28), cmap='binary')
+            ax_ae[i].xaxis.set_visible(False)
+            ax_ae[i].yaxis.set_visible(False)
+            ax_rbm[i].xaxis.set_visible(False)
+            ax_rbm[i].yaxis.set_visible(False)
+        
+        fig_ae.tight_layout()
+        fig_rbm.tight_layout()
+        fig_ae.savefig('plots/3_1_1/recall_ae_h{}.png'.format(n_components))
+        fig_rbm.savefig('plots/3_1_1/recall_rbm_h{}.png'.format(n_components))
+   
+    fig_orig, ax_orig = plt.subplots(1, 10, figsize=(20, 2))
+    for i in range(10):
+        ax_orig[i].imshow(test_images[i].reshape(28, 28), cmap='binary')
+        ax_orig[i].xaxis.set_visible(False)
+        ax_orig[i].yaxis.set_visible(False)
+    fig_orig.savefig('plots/3_1_1/orig_images.png')
+
 
 def assignment4_1_2(model):
     data = loadAll()
@@ -266,6 +307,7 @@ def assignment4_2_AE():
 
 if __name__ == '__main__':
     #assignment4_1()
-    assignment4_1_2('rbm')
+    assignment4_1_1()
+    #assignment4_1_2('rbm')
     #assignment4_2_DBN()
     #assignment4_2_AE()
