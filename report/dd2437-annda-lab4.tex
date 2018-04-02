@@ -9,7 +9,6 @@
 \usepackage{tikz}
 \usepackage{pgfplots}
 
-
 \newcommand{\mail}[1]{
   \href{mailto:#1}{#1}
 }
@@ -25,7 +24,7 @@
   compat=1.13,
   every axis/.prefix style={
     width=.85\textwidth,
-    height=250pt,
+    height=200pt,
     legend cell align=left
   },
   every axis plot/.style={
@@ -53,7 +52,7 @@
 \end{center}
 
 This lab will examine two different artificial neural network structures,
-Auto Encodes (AE) and Restricted Boltzmann Machines (RBM).
+Auto Encoders (AE) and Restricted Boltzmann Machines (RBM).
 Their effectiveness in a learning task 
 and the effect of the layer depth of the models
 will be tested and evaluated.
@@ -66,11 +65,20 @@ containing $28 \times 28$ images of handwritten digits from 0 to 9
 together with correct labels of the written digit.
 All the pixel values has for simplicity's sake been converted to binary values
 via simple thresholding.
+A total of 10000 images are used from the dataset,
+which has been further subdivided into a training set of size 8000 and a validation set of size 2000.
 
 \subsection{Hidden unit size}
 The input size hyperparameter for both of the models is decided by the shape of the data.
 In our case we require $28 \times 28 = 784$ input nodes, one for each image pixel.
 We do however have a choice in the number of hidden units, $n_{\text{h}}$.
+The error curves on the validation set during the training are displayed
+in \cref{fig:rbmtraining} for the RBM,
+and in \cref{fig:aetrainingsgd} for the AE using Stochastic Gradient Descent (SGD).
+However, the AE clearly converges to the same values no matter the number of hidden units.
+Complementary to using SGD to train the AE ADADELTA was also used,
+which error curve can be seen in \cref{fig:aetrainingadadelta}.
+
 
 \begin{figure}[!ht]
   \centering
@@ -106,7 +114,7 @@ We do however have a choice in the number of hidden units, $n_{\text{h}}$.
   \centering
   \begin{tikzpicture}
     \begin{axis}[
-      title=\textbf{AE training error},
+      title=\textbf{AE training error with SGD},
       xlabel={Epoch},
       ylabel={Validation error},
     ]
@@ -125,11 +133,24 @@ We do however have a choice in the number of hidden units, $n_{\text{h}}$.
         }
         \temp
       }
+    \end{axis}
+  \end{tikzpicture}
+  \caption{Error curves on the validation set for the AE using SGD.}
+  \label{fig:aetrainingsgd}
+\end{figure}
+
+\begin{figure}[!ht]
+  \centering
+  \begin{tikzpicture}
+    \begin{axis}[
+      title=\textbf{AE training error with ADADELTA},
+      xlabel={Epoch},
+      ylabel={Validation error},
+    ]
       \foreach \color/\hiddenunits in {10/50, 40/75, 70/100, 100/150} { 
         \edef\temp{
           \noexpand\addplot +[
-            color=red!\color!blue,
-            dashed
+            color=red!\color!blue
           ]
           table [
             x index=0,
@@ -140,11 +161,11 @@ We do however have a choice in the number of hidden units, $n_{\text{h}}$.
           \noexpand\addlegendentry{ADADELTA, $n_{\text{h}} = \hiddenunits$}
         }
         \temp
-      }
+      } 
     \end{axis}
   \end{tikzpicture}
-  \caption{Error curves on the validation set for the AE, with .}
-  \label{fig:aetraining}
+  \caption{Error curves on the validation set for the AE using ADADELTA.}
+  \label{fig:aetrainingadadelta}
 \end{figure}
 
 \subsection{Learned features}
@@ -152,6 +173,10 @@ We can examine the learned weights of each model to get an idea how the models a
 By reshaping the weight vectors back into $28 \times 28$ grids
 each hidden units weights can be represented as images
 where each pixel value corresponds to the strength of that weight from the given pixel to the hidden unit.
+Plots for these are found in \cref{fig:hiddenweights}.
+The AE models seems to in general have better trained hidden nodes
+as more of the components seems to have learned a specific shape
+instead of something that resembles white noise.
 
 \begin{figure}[!ht]
   \centering
@@ -159,6 +184,7 @@ where each pixel value corresponds to the strength of that weight from the given
     \centering
     \includegraphics[width=\textwidth]{../plots/3_1_2/last_layer_50_components_100e.png}
     \caption{AE weights, 50 hidden units.}
+    \label{fig:w50ae}
   \end{subfigure}
   ~
   \addtocounter{subfigure}{1}
@@ -166,6 +192,7 @@ where each pixel value corresponds to the strength of that weight from the given
     \centering
     \includegraphics[width=\textwidth]{../plots/3_1_2/rbm_last_layer_50_components_20e.png}
     \caption{RBM weights, 50 hidden units.}
+    \label{fig:w50rbm}
   \end{subfigure}
   \addtocounter{subfigure}{-2}
   ~
@@ -173,6 +200,7 @@ where each pixel value corresponds to the strength of that weight from the given
     \centering
     \includegraphics[width=\textwidth]{../plots/3_1_2/last_layer_100_components_100e.png}
     \caption{AE weights, 100 hidden units.}
+    \label{fig:w100ae}
   \end{subfigure}
   \addtocounter{subfigure}{1}
   ~
@@ -180,7 +208,13 @@ where each pixel value corresponds to the strength of that weight from the given
     \centering
     \includegraphics[width=\textwidth]{../plots/3_1_2/rbm_last_layer_100_components_20e.png}
     \caption{RBM weights, 100 hidden units.}
+    \label{fig:w100rbm}
   \end{subfigure}
+  \caption{
+    Image representations of the hidden weights in the AE and RBM models
+    for 50 and 100 hidden units.
+  }
+  \label{fig:hiddenweights}
 \end{figure}
 
 \end{document}
