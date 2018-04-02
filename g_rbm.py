@@ -172,7 +172,7 @@ def assignment4_1():
 
 def assignment4_1_2():
     data = loadAll()
-    n_components = 100
+    n_components = 50
     n_iter_ae = 100
     batch_size = 200
 
@@ -180,11 +180,14 @@ def assignment4_1_2():
 
     last_layer = ae.layers[2]
 
-    fig, ax = plt.subplots(10,10,figsize=(15,15))
-    for i in range(10*10):
-        plt.subplot(10,10,i+1)
+    fig, ax = plt.subplots(5, 10, figsize=(15, 7.5))
+    for i in range(10*5):
+        plt.subplot(5, 10,i+1)
         plt.imshow(last_layer.get_weights()[0][i].reshape(28,28), cmap='binary')
+        plt.xticks(())
+        plt.yticks(())
 
+    plt.tight_layout()
     fig.savefig("plots/3_1_2/last_layer_{}_components_{}e.png".format(n_components,n_iter_ae))
 
 
@@ -255,6 +258,6 @@ def assignment4_2_AE():
 
 if __name__ == '__main__':
     #assignment4_1()
-    #assignment4_1_2()
-    assignment4_2_DBN()
+    assignment4_1_2()
+    #assignment4_2_DBN()
     #assignment4_2_AE()
