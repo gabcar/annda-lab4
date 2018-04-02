@@ -41,12 +41,13 @@
     \vspace{.5ex}
     \large DD2437 - Artificial Neural Networks \& Deep Architectures - Lab 4\\
     \vspace{1ex}
-    \large
-    \begin{tabular}{ccc}
-      Niels Agerskov & Lukas Bjarre & Gabriel Carrizo \\
-      \mail{agerskov@kth.se} & \mail{lbjarre@kth.se} & \mail{gabcar@kth.se}
-    \end{tabular}
-  } \\
+  }
+  \large
+  \begin{tabular}{ccc}
+    Niels Agerskov & Lukas Bjarre & Gabriel Carrizo \\
+    \mail{agerskov@kth.se} & \mail{lbjarre@kth.se} & \mail{gabcar@kth.se}
+  \end{tabular}
+  \\
   \vspace{.5ex}
   \rule{\textwidth}{0.4pt}
 \end{center}
@@ -172,8 +173,36 @@ which is why the ADADELTA trained AE is only used furthermore.
   \label{fig:aetrainingadadelta}
 \end{figure}
 
+The quality of the models can be seen in \cref{fig:recall},
+where one image of each class have been used to get both models recalled versions.
+\begin{figure}[!ht]
+  \centering
+  \begin{subfigure}[t]{\textwidth}
+    \centering
+    \includegraphics[width=0.9\textwidth]{../plots/3_1_1/orig_images.png}
+    \caption{Input patterns}
+    \label{fig:inputpatterns}
+  \end{subfigure}
+  ~
+  \begin{subfigure}[t]{\textwidth}
+    \centering
+    \includegraphics[width=0.9\textwidth]{../plots/3_1_1/recall_ae_h150.png}
+    \caption{Recalled patterns of the AE, 150 hidden units}
+    \label{fig:recallae}
+  \end{subfigure}
+  ~
+  \begin{subfigure}[t]{\textwidth}
+    \centering
+    \includegraphics[width=0.9\textwidth]{../plots/3_1_1/recall_rbm_h150.png}
+    \caption{Recalled patterns of the RBM, 150 hidden units}
+    \label{fig:recallrbm}
+  \end{subfigure}
+  \caption{Recalled images from the models.}
+  \label{fig:recall}
+\end{figure}
+
 \subsection{Learned features}
-We can examine the learned weights of each model to get an idea how the models are learning.
+The learned weights of each model can be examined to get an idea what and how the models are learning.
 By reshaping the weight vectors back into $28 \times 28$ grids
 each hidden units weights can be represented as images
 where each pixel value corresponds to the strength of that weight from the given pixel to the hidden unit.

@@ -208,6 +208,7 @@ def assignment4_1_1():
         ax_orig[i].imshow(test_images[i].reshape(28, 28), cmap='binary')
         ax_orig[i].xaxis.set_visible(False)
         ax_orig[i].yaxis.set_visible(False)
+    fig_orig.tight_layout()
     fig_orig.savefig('plots/3_1_1/orig_images.png')
 
 
