@@ -170,25 +170,33 @@ def assignment4_1():
 
         print("{} nodes complete.".format(n))
 
-def assignment4_1_2():
+def assignment4_1_2(model):
     data = loadAll()
-    n_components = 50
-    n_iter_ae = 100
+    n_components = 100
     batch_size = 200
+    
+    if model == 'ae':
+        n_iter = 100
+        ae, err_ae = trainAE(data, n_components, n_iter=n_iter, batch_size=batch_size, learning_rate=0.01)
+        last_layer = ae.layers[2]
+        weights = last_layer.get_weights()[0]
+    elif model == 'rbm':
+        n_iter = 20
+        rbm, err_rbm = trainRBM(data, n_components, n_iter, batch_size)
+        weights = rbm.components
 
-    ae, err_ae = trainAE(data, n_components, n_iter=n_iter_ae, batch_size=batch_size, learning_rate=0.01)
+    n_cols = 10
+    n_rows = int(n_components / n_cols)
 
-    last_layer = ae.layers[2]
-
-    fig, ax = plt.subplots(5, 10, figsize=(15, 7.5))
-    for i in range(10*5):
-        plt.subplot(5, 10,i+1)
-        plt.imshow(last_layer.get_weights()[0][i].reshape(28,28), cmap='binary')
+    fig, ax = plt.subplots(n_rows, n_cols, figsize=(15, 7.5 if n_rows == 5 else 15))
+    for i in range(n_rows * n_cols):
+        plt.subplot(n_rows, n_cols, i + 1)
+        plt.imshow(weights[i].reshape(28,28), cmap='binary')
         plt.xticks(())
         plt.yticks(())
 
     plt.tight_layout()
-    fig.savefig("plots/3_1_2/last_layer_{}_components_{}e.png".format(n_components,n_iter_ae))
+    fig.savefig("plots/3_1_2/{}_last_layer_{}_components_{}e.png".format(model, n_components, n_iter))
 
 
 
@@ -258,6 +266,6 @@ def assignment4_2_AE():
 
 if __name__ == '__main__':
     #assignment4_1()
-    assignment4_1_2()
+    assignment4_1_2('rbm')
     #assignment4_2_DBN()
     #assignment4_2_AE()
