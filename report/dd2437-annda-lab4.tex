@@ -72,13 +72,17 @@ which has been further subdivided into a training set of size 8000 and a validat
 The input size hyperparameter for both of the models is decided by the shape of the data.
 In our case we require $28 \times 28 = 784$ input nodes, one for each image pixel.
 We do however have a choice in the number of hidden units, $n_{\text{h}}$.
+
+Both models were trained with $n_\text{h} = 50,\,75,\,100,\,150$ hidden units.
 The error curves on the validation set during the training are displayed
 in \cref{fig:rbmtraining} for the RBM,
 and in \cref{fig:aetrainingsgd} for the AE using Stochastic Gradient Descent (SGD).
 However, the AE clearly converges to the same values no matter the number of hidden units.
 Complementary to using SGD to train the AE ADADELTA was also used,
 which error curve can be seen in \cref{fig:aetrainingadadelta}.
-
+ADADELTA shows a similar improvement given more hidden units as the error curves for the RBM.
+The errors are also on one order of magnitude smaller compared to the errors using SGD,
+which is why the ADADELTA trained AE is only used furthermore.
 
 \begin{figure}[!ht]
   \centering
