@@ -1,2 +1,5 @@
 binMNIST_data/
-
+*.pyc
+report/
+!report/*.tex
+!report/*.pdf

@@ -5,6 +5,15 @@
 \usepackage{graphicx}
 \usepackage[hidelinks]{hyperref}
 \usepackage{cleveref}
+\usepackage{tikz}
+\usepackage{pgfplots}
+
+\pgfplotsset{
+  compat=1.13,
+  every axis/.style={
+    legend cell align=left
+  }
+}
 
 \newcommand{\mail}[1]{
   \href{mailto:#1}{#1}
@@ -40,6 +49,48 @@ Auto Encodes (AE) and Restricted Boltzmann Machines (RBM).
 Their effectiveness in a learning task 
 and the effect of the layer depth of the models
 will be tested and evaluated.
+
+\section{Feature learning}
+In this first task shallow versions of both models are trained
+as benchmarks for the later deeper versions.
+The dataset used is a subset of the MNIST dataset
+containing $28 \times 28$ images of handwritten digits from 0 to 9
+together with correct labels of the written digit.
+All the pixel values has for simplicity's sake been converted to binary values
+via simple thresholding.
+
+\begin{figure}[!ht]
+  \centering
+  \begin{tikzpicture}
+    \begin{axis}[
+      width=0.8\textwidth,
+      height=200pt,
+      title=\textbf{RBM training results},
+      xlabel={Epoch},
+      ylabel={Validation error},
+      every axis plot/.style={
+        no marks,
+        line width=0.8pt
+      }
+    ]
+      \foreach \color/\hiddenunits in {10/50, 40/75, 70/100, 100/150} { 
+        \edef\temp{
+          \noexpand\addplot +[
+            color=red!\color!blue
+          ]
+          table [
+            x index=0,
+            y index=2,
+            col sep=comma
+          ]
+          {../data/rbm_hidden_20e_\noexpand\hiddenunits.csv};
+          \noexpand\addlegendentry{$n_{\text{hidden}} = \hiddenunits$}
+        }
+        \temp
+      }
+    \end{axis}
+  \end{tikzpicture}
+\end{figure}
 
 \end{document}
 
