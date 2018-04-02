@@ -3,6 +3,7 @@
 \usepackage{geometry}
 \usepackage{mathtools}
 \usepackage{graphicx}
+\usepackage{subcaption}
 \usepackage[hidelinks]{hyperref}
 \usepackage{cleveref}
 \usepackage{tikz}
@@ -23,8 +24,8 @@
 \pgfplotsset{
   compat=1.13,
   every axis/.prefix style={
-    width=.8\textwidth,
-    height=200pt,
+    width=.85\textwidth,
+    height=250pt,
     legend cell align=left
   },
   every axis plot/.style={
@@ -66,15 +67,16 @@ together with correct labels of the written digit.
 All the pixel values has for simplicity's sake been converted to binary values
 via simple thresholding.
 
+\subsection{Hidden unit size}
 The input size hyperparameter for both of the models is decided by the shape of the data.
 In our case we require $28 \times 28 = 784$ input nodes, one for each image pixel.
-We do however have a choice in the number of hidden units.
+We do however have a choice in the number of hidden units, $n_{\text{h}}$.
 
 \begin{figure}[!ht]
   \centering
   \begin{tikzpicture}
     \begin{axis}[
-      title=\textbf{RBM training results},
+      title=\textbf{RBM training error},
       xlabel={Epoch},
       ylabel={Validation error},
     ]
@@ -89,7 +91,7 @@ We do however have a choice in the number of hidden units.
             col sep=comma
           ]
           {../data/rbm_hidden_20e_\noexpand\hiddenunits.csv};
-          \noexpand\addlegendentry{$n_{\text{hidden}} = \hiddenunits$}
+          \noexpand\addlegendentry{$n_{\text{h}} = \hiddenunits$}
         }
         \temp
       }
@@ -97,6 +99,73 @@ We do however have a choice in the number of hidden units.
   \end{tikzpicture}
   \caption{Error curves on the validation set for the RBM.}
   \label{fig:rbmtraining}
+\end{figure}
+
+
+\begin{figure}[!ht]
+  \centering
+  \begin{tikzpicture}
+    \begin{axis}[
+      title=\textbf{AE training error},
+      xlabel={Epoch},
+      ylabel={Validation error},
+    ]
+      \foreach \color/\hiddenunits in {10/50, 40/75, 70/100, 100/150} { 
+        \edef\temp{
+          \noexpand\addplot +[
+            color=red!\color!blue
+          ]
+          table [
+            x index=0,
+            y index=2,
+            col sep=comma
+          ]
+          {../data/ae_hidden_150e_\noexpand\hiddenunits.csv};
+          \noexpand\addlegendentry{SGD, $n_{\text{h}} = \hiddenunits$}
+        }
+        \temp
+      }
+      \foreach \color/\hiddenunits in {10/50, 40/75, 70/100, 100/150} { 
+        \edef\temp{
+          \noexpand\addplot +[
+            color=red!\color!blue,
+            dashed
+          ]
+          table [
+            x index=0,
+            y index=2,
+            col sep=comma
+          ]
+          {../data/ae_hidden_adadelta_150e_\noexpand\hiddenunits.csv};
+          \noexpand\addlegendentry{ADADELTA, $n_{\text{h}} = \hiddenunits$}
+        }
+        \temp
+      }
+    \end{axis}
+  \end{tikzpicture}
+  \caption{Error curves on the validation set for the AE, with .}
+  \label{fig:aetraining}
+\end{figure}
+
+\subsection{Learned features}
+We can examine the learned weights of each model to get an idea how the models are learning.
+By reshaping the weight vectors back into $28 \times 28$ grids
+each hidden units weights can be represented as images
+where each pixel value corresponds to the strength of that weight from the given pixel to the hidden unit.
+
+\begin{figure}[!ht]
+  \centering
+  \begin{subfigure}[t]{0.47\textwidth}
+    \centering
+    \includegraphics[width=0.9\textwidth]{../plots/3_1_2/last_layer_50_components_100e.png}
+    \caption{AE weights, 50 hidden units.}
+  \end{subfigure}
+  ~
+  \begin{subfigure}[t]{0.47\textwidth}
+    \centering
+    \includegraphics[width=0.9\textwidth]{../plots/3_1_2/last_layer_100_components_100e.png}
+    \caption{AE weights, 100 hidden units.}
+  \end{subfigure}
 \end{figure}
 
 \end{document}
