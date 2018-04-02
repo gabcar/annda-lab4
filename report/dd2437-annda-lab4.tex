@@ -1,0 +1,45 @@
+\documentclass{article}
+
+\usepackage{geometry}
+\usepackage{mathtools}
+\usepackage{graphicx}
+\usepackage[hidelinks]{hyperref}
+\usepackage{cleveref}
+
+\newcommand{\mail}[1]{
+  \href{mailto:#1}{#1}
+}
+
+\geometry{
+  top=2cm,
+  bottom=2cm,
+  right=3cm,
+  left=3cm
+}
+
+\begin{document}
+
+\begin{center}
+  \textbf{
+    \LARGE Deep Learning with Stacked AEs \& RBMs \\
+    \vspace{.5ex}
+    \large DD2437 - Artificial Neural Networks \& Deep Architectures - Lab 4\\
+    \vspace{1ex}
+    \large
+    \begin{tabular}{ccc}
+      Niels Agerskov & Lukas Bjarre & Gabriel Carrizo \\
+      \mail{agerskov@kth.se} & \mail{lbjarre@kth.se} & \mail{gabcar@kth.se}
+    \end{tabular}
+  } \\
+  \vspace{.5ex}
+  \rule{\textwidth}{0.4pt}
+\end{center}
+
+This lab will examine two different artificial neural network structures,
+Auto Encodes (AE) and Restricted Boltzmann Machines (RBM).
+Their effectiveness in a learning task 
+and the effect of the layer depth of the models
+will be tested and evaluated.
+
+\end{document}
+
