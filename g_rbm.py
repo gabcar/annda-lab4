@@ -212,19 +212,16 @@ def assignment4_1_1():
     fig_orig.savefig('plots/3_1_1/orig_images.png')
 
 
-def assignment4_1_2(model):
-    data = loadAll()
+def assignment4_1_2():
+    model = 'ae'
     n_components = 100
-    batch_size = 200
     
     if model == 'ae':
-        n_iter = 100
-        ae, err_ae = trainAE(data, n_components, n_iter=n_iter, batch_size=batch_size, learning_rate=0.01)
-        last_layer = ae.layers[2]
-        weights = last_layer.get_weights()[0]
+        ae = load_model('ae_model{}.h5'.format(n_components))
+        last_layer = ae.layers[1]
+        weights = last_layer.get_weights()[0].T
     elif model == 'rbm':
-        n_iter = 20
-        rbm, err_rbm = trainRBM(data, n_components, n_iter, batch_size)
+        rbm = joblib.load('rbm_model_{}.pkl'.format(n_components))
         weights = rbm.components
 
     n_cols = 10
@@ -238,16 +235,16 @@ def assignment4_1_2(model):
         plt.yticks(())
 
     plt.tight_layout()
-    fig.savefig("plots/3_1_2/{}_last_layer_{}_components_{}e.png".format(model, n_components, n_iter))
+    fig.savefig("plots/3_1_2/{}_last_layer_{}_components.png".format(model, n_components))
 
 
 
 def assignment4_2_DBN():
     data = loadAll()
-    n_iter = 2
-    n_iter_mlp = 5
+    n_iter = 20
+    n_iter_mlp = 20
 
-    nodes = [200,150]#,100,50]
+    nodes = [150, 100] #,100,50]
     no_of_layers = len(nodes)
 
     learning_rate = 0.01
@@ -260,29 +257,36 @@ def assignment4_2_DBN():
     pipe = []
     acc = []
 
+    prev_layer_size = len(train[0])
+
     for i in range(no_of_layers):
+
         rbm = BernoulliRBM(n_components=nodes[i], verbose=True, batch_size=batch_size, random_state=1)
-
         rbm.learning_rate = learning_rate
-
         n_features = len(train[0])
-
-        #initialize the weight matrix with small (normally distributed) random values with hidden and visible biases initialized to 0.
-        rbm.components = np.random.randn(nodes[i], n_features)*0.1
+        rbm.components = np.random.randn(nodes[i], prev_layer_size)*0.1
         rbm.intercept_hidden_ = np.zeros((nodes[i],))
-        rbm.intercept_visible_ = np.zeros((n_features,))
+        rbm.intercept_visible_ = np.zeros((prev_layer_size,))
         rbm.n_iter = n_iter
 
-        train = rbm.fit_transform(train)  # Enable to start pre-training
+        #train = rbm.fit_transform(train)  # Enable to start pre-training
 
         rbms.append(rbm)
         pipe.append(('rbm{}'.format(i), rbm))
 
-        print("pre-training step {}/{} done.".format(i+1,no_of_layers))
+        prev_layer_size = nodes[i]
 
-    mlp = MLPClassifier(solver='sgd', random_state=1, learning_rate="adaptive", learning_rate_init=0.01, hidden_layer_sizes=(nodes[no_of_layers-1],10), max_iter=n_iter_mlp, verbose=True)
+    mlp = MLPClassifier(
+        solver='sgd',
+        random_state=1,
+        learning_rate="adaptive",
+        learning_rate_init=0.01,
+        hidden_layer_sizes=(nodes[no_of_layers-1], 10),
+        max_iter=n_iter_mlp,
+        verbose=True
+    )
 
-    print(pipe)
+    #print(pipe)
     pipe.append(('mlp', mlp))
     print(pipe)
 
@@ -296,6 +300,7 @@ def assignment4_2_DBN():
 
     print(acc)
 
+    joblib.dump(clsf, 'dbn_{}l.pkl'.format(no_of_layers))
 
 
 def assignment4_2_AE():
@@ -308,7 +313,7 @@ def assignment4_2_AE():
 
 if __name__ == '__main__':
     #assignment4_1()
-    assignment4_1_1()
-    #assignment4_1_2('rbm')
+    #assignment4_1_1()
+    assignment4_1_2()
     #assignment4_2_DBN()
     #assignment4_2_AE()
