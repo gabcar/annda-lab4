@@ -238,13 +238,12 @@ def assignment4_1_2():
     fig.savefig("plots/3_1_2/{}_last_layer_{}_components.png".format(model, n_components))
 
 
-
 def assignment4_2_DBN():
     data = loadAll()
-    n_iter = 20
-    n_iter_mlp = 20
+    n_iter = 75
+    n_iter_mlp = 50
 
-    nodes = [150, 100] #,100,50]
+    nodes = [150, 100] #, 50]
     no_of_layers = len(nodes)
 
     learning_rate = 0.01
@@ -314,6 +313,6 @@ def assignment4_2_AE():
 if __name__ == '__main__':
     #assignment4_1()
     #assignment4_1_1()
-    assignment4_1_2()
-    #assignment4_2_DBN()
+    #assignment4_1_2()
+    assignment4_2_DBN()
     #assignment4_2_AE()
