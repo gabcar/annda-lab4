@@ -243,7 +243,7 @@ def assignment4_2_DBN():
     n_iter = 75
     n_iter_mlp = 50
 
-    nodes = [150, 100] #, 50]
+    nodes = []#[150, 100] #, 50]
     no_of_layers = len(nodes)
 
     learning_rate = 0.01
@@ -280,7 +280,7 @@ def assignment4_2_DBN():
         random_state=1,
         learning_rate="adaptive",
         learning_rate_init=0.01,
-        hidden_layer_sizes=(nodes[no_of_layers-1], 10),
+        hidden_layer_sizes=(784, 10),#(nodes[no_of_layers-1], 10),
         max_iter=n_iter_mlp,
         verbose=True
     )
@@ -339,7 +339,7 @@ if __name__ == '__main__':
     #assignment4_1()
     #assignment4_1_1()
     #assignment4_1_2()
-    #assignment4_2_DBN()
+    assignment4_2_DBN()
     #assignment4_2_AE()
-    eval_dbn()
+    #eval_dbn()
 
