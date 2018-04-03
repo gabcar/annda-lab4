@@ -310,9 +310,36 @@ def assignment4_2_AE():
     rbms = []
     learning_rate = 0.01
 
+
+def eval_dbn():
+    data = loadAll()
+    n_layers = 3
+    dbn = joblib.load('dbn_{}l.pkl'.format(n_layers))
+    
+    predicted = dbn.predict(data['X_tst'])
+    print('Accuracy:', np.sum(data['T_tst'].T == predicted)/len(data['T_tst']))
+
+    weights = dbn.named_steps['rbm{}'.format(n_layers - 1)].components
+    n_cols = 10
+    n_rows = int(weights.shape[0] / n_cols)
+
+    fig, ax = plt.subplots(n_rows, n_cols, figsize=(int(1.5 * n_cols), int(1.5 * n_rows)))
+    for i in range(n_rows * n_cols):
+        plt.subplot(n_rows, n_cols, i + 1)
+        plt.imshow(weights[i].reshape(10, -1), cmap='binary')
+        plt.xticks(())
+        plt.yticks(())
+
+    plt.tight_layout()
+    fig.savefig("plots/3_2_1/dbn_{}l.png".format(n_layers))
+    
+    
+
 if __name__ == '__main__':
     #assignment4_1()
     #assignment4_1_1()
     #assignment4_1_2()
-    assignment4_2_DBN()
+    #assignment4_2_DBN()
     #assignment4_2_AE()
+    eval_dbn()
+
