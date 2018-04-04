@@ -4,6 +4,7 @@
 \usepackage{mathtools}
 \usepackage{graphicx}
 \usepackage{subcaption}
+\usepackage{booktabs}
 \usepackage[hidelinks]{hyperref}
 \usepackage{cleveref}
 \usepackage{tikz}
@@ -251,6 +252,18 @@ instead of something that resembles white noise.
 \end{figure}
 
 \section{Deep architectures}
+
+\begin{table}[!ht]
+  \centering
+  \caption{Accuracy of different deep architectures}
+  \begin{tabular}{ccc}
+    Layers & DBN & SAE \\ \midrule
+    0 & \multicolumn{2}{c}{0.939} \\
+    1 & 0.937 & 0.937 \\
+    2 & 0.907 & 0.943 \\
+    3 & 0.859 & 0.866
+  \end{tabular}
+\end{table}
 
 \begin{figure}[!ht]
   \centering
