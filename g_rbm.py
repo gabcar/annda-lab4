@@ -415,6 +415,61 @@ def eval_sae():
     plt.tight_layout()
     fig.savefig("plots/3_2_1/sae_{}l.png".format(n_layers))
 
+
+def check_activation_dbn():
+    data = loadAll()
+    digits = data['plot_ims']
+    
+    n_layers = 3
+    dbn = joblib.load('dbn_{}l.pkl'.format(n_layers))
+
+    digit_activation_map = {}
+    for d, img_data in enumerate(digits):
+        activations = []
+        curr_act = img_data
+        for l in range(n_layers):
+            layer = dbn.named_steps['rbm{}'.format(l)]
+            [curr_act] = layer.transform([curr_act])
+            activations.append(curr_act)
+        digit_activation_map[d] = activations
+
+    for d in range(10):
+        activation = digit_activation_map[d]
+        fig, ax = plt.subplots(1, 3, figsize=(4.5, 1.5))
+        for i in range(n_layers):
+            ax[i].imshow(activation[i].reshape(10, -1), cmap='binary')
+            ax[i].xaxis.set_visible(False)
+            ax[i].yaxis.set_visible(False)
+        fig.tight_layout()
+        fig.savefig('plots/3_2_2/dbn_d{}_activations.png'.format(d))
+
+
+def check_activation_sae():
+    data = loadAll()
+    digits = data['plot_ims']
+    
+    n_layers = 3
+    sae = load_model('sae_{}l.h5'.format(n_layers))
+    digit_activation_map = {}
+    for d, img_data in enumerate(digits):
+        activations = []
+        for l in range(n_layers):
+            m = Model(inputs=sae.input, outputs=sae.get_layer(index=l + 1).output)
+            m.compile(optimizer='adadelta', loss='mean_squared_error')
+            activations.append(m.predict([np.array([img_data])]))
+        digit_activation_map[d] = activations
+
+    for d in range(10):
+        activation = digit_activation_map[d]
+        fig, ax = plt.subplots(1, 3, figsize=(4.5, 1.5))
+        for i in range(n_layers):
+            ax[i].imshow(activation[i].reshape(10, -1), cmap='binary')
+            ax[i].xaxis.set_visible(False)
+            ax[i].yaxis.set_visible(False)
+        fig.tight_layout()
+        fig.savefig('plots/3_2_2/sae_d{}_activations.png'.format(d))
+
+
 if __name__ == '__main__':
     #assignment4_1()
     #assignment4_1_1()
@@ -422,5 +477,7 @@ if __name__ == '__main__':
     #assignment4_2_DBN()
     #assignment4_2_AE()
     #eval_dbn()
-    eval_sae()
+    #eval_sae()
+    #check_activation_dbn()
+    check_activation_sae()
 
