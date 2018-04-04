@@ -304,11 +304,71 @@ def assignment4_2_DBN():
 
 def assignment4_2_AE():
     data = loadAll()
-    n_iter = 20
-    no_of_layers = 3
-    nodes = [200,100,50]
-    rbms = []
+    n_iter = 150
+    nodes = [150, 100, 50]
+    n_layers = len(nodes)
     learning_rate = 0.01
+
+    deep_input_layer = Input(shape=(784,))
+    prev_layer = deep_input_layer
+
+    training_data = data['X']
+    validation_data = data['X_tst']
+    prev_layer_size = 784
+
+    for i in range(n_layers):
+        input_layer = Input(shape=(prev_layer_size,))
+        encoder_layer = Dense(nodes[i], activation='relu')(input_layer)
+        decoder_layer = Dense(prev_layer_size, activation='sigmoid')(encoder_layer)
+        ae = Model(inputs=input_layer, outputs=decoder_layer)
+        ae.compile(optimizer='adadelta', loss='mean_squared_error')
+
+        ae.fit(training_data, training_data,
+               verbose=True,
+               epochs=n_iter,
+               batch_size=200,
+               shuffle=True,
+               validation_data=(validation_data, validation_data))
+
+        encoder = Model(inputs=input_layer, output=encoder_layer)
+        encoder.compile(optimizer='adadelta', loss='mean_squared_error')
+
+        training_data = encoder.predict(training_data)
+        validation_data = encoder.predict(validation_data)
+        
+        prev_layer = Dense(nodes[i],
+                           weights=ae.layers[1].get_weights(),
+                           activation='relu')(prev_layer)
+
+        prev_layer_size = nodes[i]
+
+    final_layer = Dense(10, activation='sigmoid')(prev_layer)
+    sae = Model(inputs=deep_input_layer, output=final_layer)
+    sae.compile(optimizer='adadelta', loss='mean_squared_error')
+    
+    vec_targets = get_vector_repr(data['T_trn'])
+    vec_targets_tst = get_vector_repr(data['T_tst'])
+    sae.fit(data['X'], vec_targets,
+            verbose=True,
+            epochs=n_iter,
+            batch_size=200,
+            shuffle=True,
+            validation_data=(data['X_tst'], vec_targets_tst))
+
+    predict = sae.predict(data['X_tst'])
+    predict = np.argmax(predict, axis=1)
+    accuracy = np.sum(data['T_tst'].T == predict) / len(data['T_tst'])
+    print(accuracy)
+
+    sae.save('sae_{}l.h5'.format(n_layers))
+
+def get_vector_repr(data):
+    vec = np.zeros(shape=(data.shape[0], 10))
+    for i, t in enumerate(data):
+        vec[i][t] = 1
+    return vec
+
+
 
 
 def eval_dbn():
@@ -339,7 +399,7 @@ if __name__ == '__main__':
     #assignment4_1()
     #assignment4_1_1()
     #assignment4_1_2()
-    assignment4_2_DBN()
-    #assignment4_2_AE()
+    #assignment4_2_DBN()
+    assignment4_2_AE()
     #eval_dbn()
 
