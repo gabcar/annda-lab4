@@ -250,5 +250,73 @@ instead of something that resembles white noise.
   \label{fig:hiddenweights}
 \end{figure}
 
+\section{Deep architectures}
+
+\begin{figure}[!ht]
+  \centering
+  \begin{subfigure}[t]{0.47\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{../plots/3_2_1/sae_2l.png}
+    \caption{Stacked AE, layer 2 weights.}
+    \label{fig:w50ae}
+  \end{subfigure}
+  ~
+  \addtocounter{subfigure}{1}
+  \begin{subfigure}[t]{0.47\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{../plots/3_2_1/dbn_2l.png}
+    \caption{DBN, layer 2 weights.}
+    \label{fig:w50rbm}
+  \end{subfigure}
+  \addtocounter{subfigure}{-2}
+  ~
+  \begin{subfigure}[t]{0.47\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{../plots/3_2_1/sae_3l.png}
+    \caption{Stacked AE, layer 3 weights.}
+    \label{fig:w100ae}
+  \end{subfigure}
+  \addtocounter{subfigure}{1}
+  ~
+  \begin{subfigure}[t]{0.47\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{../plots/3_2_1/dbn_3l.png}
+    \caption{DBN, layer 3 weights.}
+    \label{fig:w100rbm}
+  \end{subfigure}
+  \caption{
+    Image representations of the hidden weights in the AE and RBM models
+    for 50 and 100 hidden units.
+  }
+  \label{fig:hiddenweights}
+\end{figure}
+
+\begin{figure}[!ht]
+  \centering
+  \begin{subfigure}[t]{0.47\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{../plots/3_2_2/sae_d0_activations.png}
+    \caption{Activations of hidden units in SAE for a 0 digit.}
+  \end{subfigure}
+  ~
+  \begin{subfigure}[t]{0.47\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{../plots/3_2_2/dbn_d0_activations.png}
+    \caption{Activations of hidden units in DBN for a 0 digit.}
+  \end{subfigure}
+  ~
+  \begin{subfigure}[t]{0.47\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{../plots/3_2_2/sae_d8_activations.png}
+    \caption{Activations of hidden units in SAE for a 8 digit.}
+  \end{subfigure}
+  ~
+  \begin{subfigure}[t]{0.47\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{../plots/3_2_2/dbn_d8_activations.png}
+    \caption{Activations of hidden units in DBN for a 8 digit.}
+  \end{subfigure}
+\end{figure}
+
 \end{document}
 
