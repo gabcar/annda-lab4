@@ -369,8 +369,6 @@ def get_vector_repr(data):
     return vec
 
 
-
-
 def eval_dbn():
     data = loadAll()
     n_layers = 3
@@ -394,12 +392,35 @@ def eval_dbn():
     fig.savefig("plots/3_2_1/dbn_{}l.png".format(n_layers))
     
     
+def eval_sae():
+    data = loadAll()
+    n_layers = 3
+    sae = load_model('sae_{}l.h5'.format(n_layers))
+    
+    predicted = sae.predict(data['X_tst'])
+    predicted = np.argmax(predicted, axis=1)
+    print('Accuracy:', np.sum(data['T_tst'].T == predicted)/len(data['T_tst']))
+
+    weights = sae.layers[n_layers].get_weights()[0].T
+    n_cols = 10
+    n_rows = int(weights.shape[0] / n_cols)
+
+    fig, ax = plt.subplots(n_rows, n_cols, figsize=(int(1.5 * n_cols), int(1.5 * n_rows)))
+    for i in range(n_rows * n_cols):
+        plt.subplot(n_rows, n_cols, i + 1)
+        plt.imshow(weights[i].reshape(10, -1), cmap='binary')
+        plt.xticks(())
+        plt.yticks(())
+
+    plt.tight_layout()
+    fig.savefig("plots/3_2_1/sae_{}l.png".format(n_layers))
 
 if __name__ == '__main__':
     #assignment4_1()
     #assignment4_1_1()
     #assignment4_1_2()
     #assignment4_2_DBN()
-    assignment4_2_AE()
+    #assignment4_2_AE()
     #eval_dbn()
+    eval_sae()
 
