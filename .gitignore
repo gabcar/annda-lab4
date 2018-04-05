@@ -3,3 +3,4 @@ binMNIST_data/
 report/
 !report/*.tex
 !report/*.pdf
+!report/*.bib
