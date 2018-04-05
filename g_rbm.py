@@ -470,14 +470,53 @@ def check_activation_sae():
         fig.savefig('plots/3_2_2/sae_d{}_activations.png'.format(d))
 
 
+def train_mlp_classifier():
+    data = loadAll()
+    
+    input_layer = Input(shape=(784,))
+    h1 = Dense(150, activation='relu')(input_layer)
+    h2 = Dense(100, activation='relu')(h1)
+    output_layer = Dense(10, activation='sigmoid')(h2)
+
+    mlp_classifier = Model(input_layer, output_layer)
+    mlp_classifier.compile(optimizer='adadelta', loss='mean_squared_error')
+
+    vec_t = get_vector_repr(data['T_trn'])
+    vec_t_tst = get_vector_repr(data['T_tst'])
+
+    mlp_classifier.fit(
+        data['X'], vec_t,
+        verbose=True,
+        shuffle=True,
+        batch_size=200,
+        epochs=150,
+        validation_data=(data['X_tst'], vec_t_tst)
+    )
+
+    mlp_classifier.save('mlp.h5')
+
+
+def eval_mlp():
+    data = loadAll()
+    
+    mlp = load_model('mlp.h5')
+    
+    predicted = mlp.predict(data['X_tst'])
+    predicted = np.argmax(predicted, axis=1)
+    accuracy = np.sum(data['T_tst'].T == predicted) / len(data['T_tst'])
+    print('Accuracy:', accuracy)
+
+
 if __name__ == '__main__':
     #assignment4_1()
     #assignment4_1_1()
     #assignment4_1_2()
     #assignment4_2_DBN()
-    assignment4_2_AE()
+    #assignment4_2_AE()
     #eval_dbn()
     #eval_sae()
     #check_activation_dbn()
     #check_activation_sae()
+    #train_mlp_classifier()
+    eval_mlp()
 
