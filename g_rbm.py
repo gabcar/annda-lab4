@@ -472,14 +472,16 @@ def check_activation_sae():
 
 def train_mlp_classifier():
     data = loadAll()
-    
+   
+    opt = 'sgd'
+
     input_layer = Input(shape=(784,))
     h1 = Dense(150, activation='relu')(input_layer)
     h2 = Dense(100, activation='relu')(h1)
     output_layer = Dense(10, activation='sigmoid')(h2)
 
     mlp_classifier = Model(input_layer, output_layer)
-    mlp_classifier.compile(optimizer='adadelta', loss='mean_squared_error')
+    mlp_classifier.compile(optimizer=opt, loss='mean_squared_error')
 
     vec_t = get_vector_repr(data['T_trn'])
     vec_t_tst = get_vector_repr(data['T_tst'])
@@ -493,13 +495,14 @@ def train_mlp_classifier():
         validation_data=(data['X_tst'], vec_t_tst)
     )
 
-    mlp_classifier.save('mlp.h5')
+    mlp_classifier.save('mlp_{}.h5'.format(opt))
 
 
 def eval_mlp():
     data = loadAll()
-    
-    mlp = load_model('mlp.h5')
+
+    opt = 'sgd'
+    mlp = load_model('mlp_{}.h5'.format(opt))
     
     predicted = mlp.predict(data['X_tst'])
     predicted = np.argmax(predicted, axis=1)
