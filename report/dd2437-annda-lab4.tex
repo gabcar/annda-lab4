@@ -252,18 +252,51 @@ instead of something that resembles white noise.
 \end{figure}
 
 \section{Deep architectures}
+The next step is to make the architectures deep by introducing more hidden layers.
+For the Auto Encoders this corresponds to adding more encoding layers after the first encoder layer,
+resulting in a structure called Stacked Auto Encoders (SAE).
+The deeper version of the RBM is also constructed by adding more hidden layers after the first,
+resulting in a Deep Belief Network (DBN).
+
+The task for the deep architectures was to classify a given image to the corresponding digit.
+To achieve this one additional perceptron layer was added to the end of all the deep models.
+The idea of the structure then becomes that the deep layers are supposed to find and model
+hierachical representations of the images in lower and lower dimensions,
+which the final perceptron layer can use to classify the digit.
+
+The method used to train the networks was to pre-train the hidden layers one-by-one
+using the unsupervised methods used previously.
+After one layer was trained the dataset was transformed using the trained weights
+and then the next layer used this transformed set to train its weights.
+One final supervised training run on the entire architecture
+was also used at the end to fine-tune the weights.
+
+Models with different layer depths ranging from one to three were trained and evaluated.
+The size of each hidden layer was determined first from the best performing versions 
+of the shallow models then decreasing this size for the consecutive layers.
+The best hidden unit size can be seen from  \cref{fig:rbmtraining} and \cref{fig:aetrainingadadelta}
+which in both models is $n_{\text{h}} = 150$.
+This was set to be the first hidden layer size.
+To decrease the consecutive layer sizes the two other sizes was set to $100$ and $50$.
 
 \begin{table}[!ht]
   \centering
   \caption{Accuracy of different deep architectures}
+  \label{tab:accuracy}
   \begin{tabular}{ccc}
     Layers & DBN & SAE \\ \midrule
-    0 & \multicolumn{2}{c}{0.939} \\
+    0 & \multicolumn{2}{c}{0.902} \\
     1 & 0.937 & 0.937 \\
     2 & 0.907 & 0.943 \\
     3 & 0.859 & 0.866
   \end{tabular}
 \end{table}
+
+In \cref{tab:accuracy} the accuracy of the trained models on the validation set is presented.
+The 0 layer size represents a simple perceptron layer trained directly on the dataset.
+We can see that the performance in general is similar for the different setups,
+with the difference of seeing a slight decrease in performance for the deepest setups.
+Overall the best performance was seen with the Stacked Auto Encoder with two hidden layers.
 
 \begin{figure}[!ht]
   \centering
