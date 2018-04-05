@@ -408,6 +408,29 @@ which is what the final perceptron layer is then using to classify the digits.
   \label{fig:deepactivations}
 \end{figure}
 
+\subsection{Comparison to deep MLP}
+In addition to the pre-trained deep models a comparison to a equivalent deep MLP
+with the same hidden layer setup but trained in a regular supervised way.
+Since the best performing pre-trained network setup was the SAE with two layers,
+first layer with 150 hidden units and second layer with 100 hidden units,
+this setup was used for the supervised MLP.
+Since two different optimizer was used for the AE in the start,
+SGD and ADADELTA,
+both of these optimizers were tested for the supervised training.
+\Cref{tab:supervisedvsunsupervised} shows the validation set accuracy for the final trained networks.
+The supervised trained network with ADADELTA performs extremely similar to the pre-trained network,
+but using regular SGD shows a much worse performing network.
+
+\begin{table}[!ht]
+  \centering
+  \caption{Accuracy of deep pre-trained and regular supervised networks}
+  \label{tab:supervisedvsunsupervised}
+  \begin{tabular}{c|ccc}
+    Network & SAE & MLP, SGD & MLP, ADADELTA \\ \midrule
+    Accuracy & 0.943 & 0.599 & 0.942
+  \end{tabular}
+\end{table}
+
 \bibliography{ref.bib}{}
 \bibliographystyle{plain}
 \end{document}
