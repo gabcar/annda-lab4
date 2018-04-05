@@ -305,7 +305,7 @@ def assignment4_2_DBN():
 def assignment4_2_AE():
     data = loadAll()
     n_iter = 150
-    nodes = [150, 100, 50]
+    nodes = []#[150, 100, 50]
     n_layers = len(nodes)
     learning_rate = 0.01
 
@@ -475,9 +475,9 @@ if __name__ == '__main__':
     #assignment4_1_1()
     #assignment4_1_2()
     #assignment4_2_DBN()
-    #assignment4_2_AE()
+    assignment4_2_AE()
     #eval_dbn()
     #eval_sae()
     #check_activation_dbn()
-    check_activation_sae()
+    #check_activation_sae()
 
