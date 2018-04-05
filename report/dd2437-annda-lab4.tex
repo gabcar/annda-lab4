@@ -73,10 +73,10 @@ as benchmarks for the later deeper versions.
 The dataset used is a subset of the MNIST dataset
 containing $28 \times 28$ images of handwritten digits from 0 to 9
 together with correct labels of the written digit.
-All the pixel values has for simplicity's sake been converted to binary values
+All the pixel values have for simplicity's sake been converted to binary values
 via simple thresholding.
 A total of 10000 images are used from the dataset,
-which has been further subdivided into a training set of size 8000 and a validation set of size 2000.
+which have been further subdivided into a training set of size 8000 and a validation set of size 2000.
 
 \subsection{Hidden unit size}
 The input size hyperparameter for both of the models is decided by the shape of the data.
@@ -89,10 +89,10 @@ in \cref{fig:rbmtraining} for the RBM,
 and in \cref{fig:aetrainingsgd} for the AE using Stochastic Gradient Descent (SGD).
 However, the AE clearly converges to the same values no matter the number of hidden units.
 Complementary to using SGD to train the AE ADADELTA \cite{adadelta} was also used,
-which error curve can be seen in \cref{fig:aetrainingadadelta}.
-ADADELTA shows a similar improvement given more hidden units as the error curves for the RBM.
+the error curve can be seen in \cref{fig:aetrainingadadelta}.
+ADADELTA shows a similar improvement given more hidden units.
 The errors are also on one order of magnitude smaller compared to the errors using SGD,
-which is why the ADADELTA trained AE is only used furthermore.
+which is why the AE trained with ADADELTA will be used furthermore.
 
 \begin{figure}[!ht]
   \centering
@@ -211,13 +211,13 @@ where one image of each class have been used to get both models recalled version
 \end{figure}
 
 \subsection{Learned features}
-The learned weights of each model can be examined to get an idea what and how the models are learning.
+The learned weights of each model can be examined to get an idea of what and how the models are learning.
 By reshaping the weight vectors back into $28 \times 28$ grids
-each hidden units weights can be represented as images
+each hidden units' weights can be represented as images
 where each pixel value corresponds to the strength of that weight from the given pixel to the hidden unit.
 Plots for these are found in \cref{fig:hiddenweights}.
-The AE models seems to in general have better trained hidden nodes
-as more of the components seems to have learned a specific shape
+In general the AE models seem to have better trained hidden nodes
+as more of the components seem to have learned a specific shape
 instead of something that resembles white noise.
 
 \begin{figure}[!ht]
@@ -266,14 +266,14 @@ resulting in a structure called Stacked Auto Encoders (SAE).
 The deeper version of the RBM is also constructed by adding more hidden layers after the first,
 resulting in a Deep Belief Network (DBN).
 
-The task for the deep architectures was to classify a given image to the corresponding digit.
-To achieve this one additional perceptron layer was added to the end of all the deep models.
+The task for the deep architectures were to classify a given image to the corresponding digit.
+To achieve this, one additional perceptron layer was added at the end of all the deep models.
 The idea of the structure then becomes that the deep layers are supposed to find and model
 hierachical representations of the images in lower and lower dimensions,
 which the final perceptron layer can use to classify the digit.
 
-The method used to train the networks was to pre-train the hidden layers one-by-one
-using the unsupervised methods used previously.
+The method used to train the networks was to greedily pre-train the hidden layers one-by-one
+with the previously used unsupervised methods.
 After one layer was trained the dataset was transformed using the trained weights
 and then the next layer used this transformed set to train its weights.
 One final supervised training run on the entire architecture
@@ -316,8 +316,7 @@ However, unlike the weights of the first layers the hidden units represent a tra
 from one abstract representation to another
 which is not easily represented in the original $28 \times 28$ pixel space.
 The visualisation is still done by pixels,
-where each pixel represents the weight from one previous layer unit to the represented hidden unit,
-but since the previous data representation does not necessarily makes sence in a pixel space
+where each pixel represents the weight from one previous layer unit to the represented hidden unit. Since the previous data representation does not necessarily makes sense in a pixel space
 no special patterns can be seen.
 However, to the neural network this might still represent something useful
 even though we humans cannot observe anything useful from it.
@@ -370,8 +369,7 @@ and the different images represents different layers.
 The problem of the abstract feature space is once again present
 since the pixel arrangement does not reflect any meaningful pattern in the representation.
 The more important part to observe in these pictures however is that the activation for different image classes
-produce different patterns in the representation space,
-which is what the final perceptron layer is then using to classify the digits.
+produce different patterns in the representation space. This is what the final perceptron layer is then using to classify the digits.
 \begin{figure}[!ht]
   \centering
   \begin{subfigure}[t]{0.47\textwidth}
