@@ -53,11 +53,19 @@
   \rule{\textwidth}{0.4pt}
 \end{center}
 
+\section{Introduction}
 This lab will examine two different artificial neural network structures,
 Auto Encoders (AE) and Restricted Boltzmann Machines (RBM).
 Their effectiveness in a learning task 
 and the effect of the layer depth of the models
 will be tested and evaluated.
+
+\subsection{Used libaries}
+All of the models were implemented in Python.
+For the AE models the Keras framework \cite{keras} was used,
+which in turn is built upon Tensorflow.
+Keras did not have any RBMs though,
+so for the RBMs and DBNs Scikit-learn \cite{sklearn} was used.
 
 \section{Feature learning}
 In this first task shallow versions of both models are trained
@@ -80,7 +88,7 @@ The error curves on the validation set during the training are displayed
 in \cref{fig:rbmtraining} for the RBM,
 and in \cref{fig:aetrainingsgd} for the AE using Stochastic Gradient Descent (SGD).
 However, the AE clearly converges to the same values no matter the number of hidden units.
-Complementary to using SGD to train the AE ADADELTA was also used,
+Complementary to using SGD to train the AE ADADELTA \cite{adadelta} was also used,
 which error curve can be seen in \cref{fig:aetrainingadadelta}.
 ADADELTA shows a similar improvement given more hidden units as the error curves for the RBM.
 The errors are also on one order of magnitude smaller compared to the errors using SGD,
@@ -400,5 +408,7 @@ which is what the final perceptron layer is then using to classify the digits.
   \label{fig:deepactivations}
 \end{figure}
 
+\bibliography{ref.bib}{}
+\bibliographystyle{plain}
 \end{document}
 
